@@ -11,7 +11,7 @@ from pytube import YouTube
 import os,shutil
 import mimetypes
 
-SAVE_PATH = "C:\\python_projects\\ytDjango\\Downloader\\yt\\static\\videos\\"
+# SAVE_PATH = "C:\\python_projects\\ytDjango\\Downloader\\yt\\static\\videos\\"
 
 
 def home(request):
@@ -70,7 +70,7 @@ def download(request, id):
         urll = f'https://www.youtube.com/watch?v={id}'
         try:
 
-            obj = YouTube(urll).streams.get_by_itag(choice).download(SAVE_PATH)
+            obj = YouTube(urll).streams.get_by_itag(choice).download(settings.STATIC_ROOT)
         except Exception as e:
             print(e)
     path = open(obj, 'rb')
