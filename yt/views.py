@@ -59,7 +59,7 @@ def home(request):
 
     context = {'video': video}
 
-    return render(request, 'downloader/home.html', context)
+    return render(request, 'downloader/index.html', context)
 # dwonload_path
 
 def download(request, id):
