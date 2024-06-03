@@ -1,67 +1,80 @@
-from django.shortcuts import render
-
-# Create your views here.
-from django.shortcuts import render, redirect
 from django.conf import settings
 from django.http.response import HttpResponse
-# import requests
-# from isodate import parse_duration
+from rest_framework import status
+from django.http.response import JsonResponse
+
+from rest_framework.decorators import api_view
+
+
+
 from pytube import YouTube
-# from pytube import Playlist
+from pytube import Search
+
 import os,shutil
 import mimetypes
 
-# SAVE_PATH = "C:\\python_projects\\ytDjango\\Downloader\\yt\\static\\videos\\"
 
 
+@api_view(['POST'])
 def home(request):
 
     video={}
     allItem=''
-    obj=''
+    # obj=''
     urll = ''
+    videos=[]
+    total=0
+    suggestions=[]
     if request.method == 'POST':
 
-        urll = request.POST['ytUrl']
+        urll = request.POST['search']
         try:
 
-            obj = YouTube(urll)
-            #.filter(file_extension='mp4')
-            allItem = obj.streams.filter(progressive=True)
+           
+            search = Search(urll)
+            total=len(search.results)
+            resutls=search.results
+            suggestions=search.completion_suggestions
+            
         except Exception as e:
 
             print(e)
-        itag = []
-        vformat = []
-        for Item in allItem:
+        if total>0:
+            
+            for res in resutls:
+                allItem = res.streams.filter(progressive=True)
+                itag = []
+                vformat = []
+                for Item in allItem:
 
-            try:
+                    try:
 
-                if Item.resolution and int(Item.resolution[:-1]) not in vformat:
-                    itag.append(Item.itag)
-                    vformat.append(int(Item.resolution[:-1]))
-            except Exception as e:
+                        if Item.resolution and int(Item.resolution[:-1]) not in vformat:
+                            itag.append(Item.itag)
+                            vformat.append(int(Item.resolution[:-1]))
+                    except Exception as e:
 
-                print(e)
+                        print(e)
 
-        vformat.sort(reverse=True)
+                vformat.sort(reverse=True)
 
-        mylist = zip(itag, vformat)
-        video = {
-            'title':obj.title,
-            'id': obj.video_id,
-            'url':urll,
-            'duration':int(obj.length // 60),
-            'thumbnail':obj.thumbnail_url,
-            'mylist': mylist
-        }
-        # videos.append(video)
+                mylist = zip(itag, vformat)
+                video = {
+                    'title':res.title,
+                    'id': res.video_id,
+                    'url':res.watch_url,
+                    'duration':int(res.length // 60),
+                    'thumbnail':res.thumbnail_url,
+                    'mylist':list(mylist) 
+                }
+                videos.append(video)
 
-    context = {'video': video}
-
-    return render(request, 'downloader/index.html', context)
+        context = {'videos': videos,"total":total,"search_suggestions":suggestions}
+        return JsonResponse(context)
+    return JsonResponse({"errors":"bad request"}, status=status.HTTP_400_BAD_REQUEST)
+    # return render(request, 'downloader/index.html', context)
 # dwonload_path
-
+@api_view(['POST'])
 def download(request, id):
 
     if request.method == 'POST':

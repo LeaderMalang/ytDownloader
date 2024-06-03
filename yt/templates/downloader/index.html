@@ -49,7 +49,8 @@
         </div>
 
         
-        {% if video %}
+        {% if total > 0 %}
+        {% for video in videos %}
         <div class="row">
           <div class="section-title">
             <h3>{{ video.title }}</h3>
@@ -80,6 +81,7 @@
             </div>
               <div class="col-lg-2"></div>
         </div>
+        {% endfor %}
         {% else %}
         <div class="row">
         
@@ -93,7 +95,7 @@
                 </div>
                 <div class="form-group col-md-6">
                   <!-- <label for="name">Video Link</label> -->
-                  <input type="text" name="ytUrl" placeholder="Paste your video link here" class="form-control" id="name"
+                  <input type="text" name="ytUrl" placeholder="Search Youtube Video" class="form-control" id="name"
                     required>
                 </div>
                 <div class="form-group col-md-3">
